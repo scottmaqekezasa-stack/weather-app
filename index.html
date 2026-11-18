@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Assistant - Lisakhanya Maqekeza</title>
+<style>
+  body{font-family:Arial; background:#f4f4f4; margin:0; padding:20px}
+  .box{max-width:500px; margin:20px auto; background:white; padding:25px; border-radius:12px}
+  input,button{padding:10px; margin:5px 0; border-radius:6px; border:1px solid #ccc}
+  button{background:#111; color:white; border:none; cursor:pointer}
+  li{margin:8px 0}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>My Personal Assistant</h2>
+  <p id="dateTime"></p>
+  <p id="tip">Loading daily tip...</p>
+
+  <h3>To-Do List</h3>
+  <input id="taskInput" placeholder="Add a task e.g. Check emails">
+  <button onclick="addTask()">Add Task</button>
+  <ul id="taskList"></ul>
+
+  <h3>Quick Notes</h3>
+  <input id="noteInput" placeholder="Add a note">
+  <button onclick="addNote()">Save Note</button>
+  <p id="notes"></p>
+</div>
+
+<script>
+// Live date/time - updates every second
+setInterval(() => {
+  document.getElementById("dateTime").textContent = new Date().toLocaleString();
+}, 1000);
+
+// Live data - fetches a daily tip from a public API
+fetch("https://api.adviceslip.com/advice")
+  .then(res => res.json())
+  .then(data => document.getElementById("tip").textContent = "Tip: " + data.slip.advice)
+  .catch(() => document.getElementById("tip").textContent = "Tip: Stay organised, check your tickets first.");
+
+// To-Do list - saved in browser
+let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+function showTasks(){
+  document.getElementById("taskList").innerHTML = tasks.map((t,i) =>
+    `<li>${t} <button onclick="removeTask(${i})">Done</button></li>`).join("");
+}
+function addTask(){
+  const v = document.getElementById("taskInput").value;
+  if(!v) return;
+  tasks.push(v);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  document.getElementById("taskInput").value = "";
+  showTasks();
+}
+function removeTask(i){
+  tasks.splice(i,1);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  showTasks();
+}
+showTasks();
+
+// Notes
+function addNote(){
+  const v = document.getElementById("noteInput").value;
+  if(!v) return;
+  document.getElementById("notes").textContent = "Saved note: " + v;
+  document.getElementById("noteInput").value = "";
+}
+</script>
+</body>
+</html>
